@@ -1,4 +1,4 @@
 # wrangler.toml
-name = "my-worker"
+name = "gemini-2-live-api-demo1"
 main = "worker.js"  # 关键修复点
 compatibility_date = "2024-03-01"
