@@ -1,4 +1,8 @@
 # wrangler.toml
 name = "gemini-2-live-api-demo1"
-main = "worker.js"  # 关键修复点
+main = "worker.js"
 compatibility_date = "2024-03-01"
+
+[kv_namespaces]
+binding = "ASSETS"
+id = "bd52addf834f411fb8ef5887aa102c8e"
