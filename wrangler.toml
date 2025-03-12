@@ -1,0 +1,4 @@
+# wrangler.toml
+name = "my-worker"
+main = "worker.js"  # 关键修复点
+compatibility_date = "2024-03-01"
