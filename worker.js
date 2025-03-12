@@ -29,14 +29,14 @@ export default {
     }
   
     // 从 KV 获取文件（需提前配置 wrangler.toml）
-    const asset = await env.ASSETS.get(path);
+    // const asset = await env.ASSETS.get(path);
     
-    if (!asset) {
-      return new Response('Page Not Found', { 
-        status: 404,
-        headers: { 'Content-Type': 'text/html' }
-      });
-    }
+    // if (!asset) {
+    //   return new Response('Page Not Found', { 
+    //     status: 404,
+    //     headers: { 'Content-Type': 'text/html' }
+    //   });
+    // }
   
     // 设置 Content-Type
     const contentType = getContentType(path);
