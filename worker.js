@@ -1,75 +1,73 @@
-
 // worker.js
-// addEventListener('fetch', event => {
-//     console.log('执行成功')
-//     event.respondWith(handleRequest(event.request));
-//   });
+export default {
+    async fetch(request, env, ctx) {
+      try {
+        const url = new URL(request.url);
+        const path = url.pathname;
   
-  // 定义前端资源映射（需通过构建脚本自动生成）
-  const assetManifest = {
-    "/": "index.html",
-    "/index.html": "index.html",
-    "/app.js": "app.abc123.js",
-    "/style.css": "style.def456.css",
-    "/404.html": "404.html"
+        // 处理 API 请求（可选）
+        if (path.startsWith('/api/')) {
+          return handleAPI(request);
+        }
+  
+        // 托管静态资源
+        return handleStaticAssets(request);
+      } catch (err) {
+        return new Response('Server Error', { status: 500 });
+      }
+    }
   };
   
-  async function handleRequest(request) {
+  // 静态资源处理
+  async function handleStaticAssets(request) {
     const url = new URL(request.url);
-    const path = url.pathname;
+    let path = url.pathname;
   
-    // 匹配静态资源
-    const assetPath = assetManifest[path] || assetManifest[path + '/index.html'];
+    // 默认返回 index.html 以支持 SPA 路由
+    if (path === '/' || !/\.[a-z0-9]+$/i.test(path)) {
+      path = '/index.html';
+    }
+  
+    // 从 KV 获取文件（需提前配置 wrangler.toml）
+    const asset = await env.ASSETS.get(path);
     
-    if (assetPath) {
-      // 从 Cloudflare KV 或内置存储获取文件
-      const response = await fetch(`https://your-storage-domain.com/${assetPath}`);
-      return new Response(response.body, {
-        headers: {
-          'Content-Type': getContentType(assetPath),
-          'Cache-Control': getCachePolicy(assetPath)
-        }
+    if (!asset) {
+      return new Response('Page Not Found', { 
+        status: 404,
+        headers: { 'Content-Type': 'text/html' }
       });
     }
   
-    // 处理前端路由（如 React/Vue 的 history 模式）
-    if (isFrontendRoute(path)) {
-      return fetch(`https://your-storage-domain.com/index.html`);
-    }
-  
-    // 404 处理
-    return new Response('Not Found', { 
-      status: 404,
-      headers: { 'Content-Type': 'text/html' }
+    // 设置 Content-Type
+    const contentType = getContentType(path);
+    
+    return new Response(asset.body, {
+      headers: {
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=604800' // 7天缓存
+      }
     });
   }
   
-  // 辅助函数
+  // MIME 类型映射
   function getContentType(path) {
-    const types = {
+    const ext = path.split('.').pop().toLowerCase();
+    const mime = {
       html: 'text/html',
       css: 'text/css',
       js: 'application/javascript',
+      json: 'application/json',
       png: 'image/png',
-      jpg: 'image/jpeg'
+      jpg: 'image/jpeg',
+      svg: 'image/svg+xml'
     };
-    return types[path.split('.').pop()] || 'text/plain';
+    return mime[ext] || 'text/plain';
   }
   
-  function getCachePolicy(path) {
-    return path.endsWith('.html') ? 
-      'no-cache, max-age=0' : 
-      'public, max-age=31536000, immutable';
+  // API 处理示例
+  async function handleAPI(request) {
+    return new Response(JSON.stringify({ message: 'API Response' }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
   
-  function isFrontendRoute(path) {
-    return !path.includes('.') && path !== '/favicon.ico';
-  }
-  
-
-
-export default {
-    async fetch(request, env) {
-      return handleRequest(request)
-    }
-  }
