@@ -1,9 +1,9 @@
 
 // worker.js
-addEventListener('fetch', event => {
-    console.log('执行成功')
-    event.respondWith(handleRequest(event.request));
-  });
+// addEventListener('fetch', event => {
+//     console.log('执行成功')
+//     event.respondWith(handleRequest(event.request));
+//   });
   
   // 定义前端资源映射（需通过构建脚本自动生成）
   const assetManifest = {
@@ -68,8 +68,8 @@ addEventListener('fetch', event => {
   
 
 
-// export default {
-//     async fetch(request, env) {
-//       return new Response("Hello world")
-//     }
-//   }
+export default {
+    async fetch(request, env) {
+      return handleRequest(request)
+    }
+  }
